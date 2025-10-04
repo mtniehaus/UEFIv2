@@ -335,7 +335,7 @@ function Get-UEFISecureBootCerts {
                 if ($guid -eq $EFI_CERT_X509_GUID) {
                     $certBytes = $db[($so+16)..($so+16+$signatureSize-1)]
                     if ($PSEdition -eq "Core") {
-                        $cert = New-Object System.Security.Cryptography.X509Certificates.X509Certificate2 -ArgumentList $certBytes
+                        $cert = [System.Security.Cryptography.X509Certificates.X509Certificate]::new([Byte[]]$certBytes)
                     } else {
                         $cert = New-Object System.Security.Cryptography.X509Certificates.X509Certificate2
                         $cert.Import([Byte[]]$certBytes)

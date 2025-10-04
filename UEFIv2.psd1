@@ -27,10 +27,10 @@ Author = 'Michael Niehaus'
 CompanyName = ''
 
 # Copyright statement for this module
-Copyright = 'Subject to https://creativecommons.org/licenses/by/4.0/'
+Copyright = 'Copyright (c) 2025 by Michael Niehaus, using MIT license'
 
 # Description of the functionality provided by this module
-Description = 'Sample module for interacting with UEFI from PowerShell'
+Description = 'Module for interacting with UEFI from PowerShell'
 
 # Minimum version of the Windows PowerShell engine required by this module
 PowerShellVersion = '5.1'
@@ -98,10 +98,10 @@ PrivateData = @{
         # Tags = @()
 
         # A URL to the license for this module.
-        # LicenseUri = ''
+        LicenseUri = 'https://github.com/mtniehaus/UEFIv2/blob/main/license.txt'
 
         # A URL to the main website for this project.
-        # ProjectUri = ''
+        ProjectUri = 'https://github.com/mtniehaus/UEFIv2'
 
         # A URL to an icon representing this module.
         # IconUri = ''
