@@ -110,29 +110,34 @@ function Get-UEFIVariable
     PROCESS {
         if ($All) {
             # Get the full variable list
-            $VARIABLE_INFORMATION_NAMES = 1
-            $size = 1024 * 1024
+            $ENUM_TYPE_VARIABLE_NAME = 1
+            $size = 0
+            $rc = $uefiNative[0]::NtEnumerateSystemEnvironmentValuesEx($ENUM_TYPE_VARIABLE_NAME, $null, [ref] $size)
             $result = New-Object Byte[]($size)
-            $rc = $uefiNative[0]::NtEnumerateSystemEnvironmentValuesEx($VARIABLE_INFORMATION_NAMES, $result, [ref] $size)
+
+            $rc = $uefiNative[0]::NtEnumerateSystemEnvironmentValuesEx($ENUM_TYPE_VARIABLE_NAME, $result, [ref] $size)
             $lastError = [Runtime.InteropServices.Marshal]::GetLastWin32Error()
             if ($rc -eq 0)
             {
                 $currentPos = 0
-                while ($true)
+                do
                 {
                     # Get the offset to the next entry
                     $nextOffset = [System.BitConverter]::ToUInt32($result, $currentPos)
-                    if ($nextOffset -eq 0)
-                    {
-                        break
-                    }
     
                     # Get the vendor GUID for the current entry
                     $guidBytes = $result[($currentPos + 4)..($currentPos + 4 + 15)]
                     [Guid] $vendor = [Byte[]]$guidBytes
                     
                     # Get the name of the current entry
-                    $name = [System.Text.Encoding]::Unicode.GetString($result[($currentPos + 20)..($currentPos + $nextOffset - 1)])
+                    if ($nextOffset -gt 0)
+                    {
+                        $name = [System.Text.Encoding]::Unicode.GetString($result[($currentPos + 20)..($currentPos + $nextOffset - 1)])
+                    }
+                    else
+                    {
+                        $name = [System.Text.Encoding]::Unicode.GetString($result[($currentPos + 20)..($size - 1)])
+                    }
     
                     # Return a new object to the pipeline
                     New-Object PSObject -Property @{Namespace = $vendor.ToString('B'); VariableName = $name.Replace("`0","") }
@@ -140,6 +145,7 @@ function Get-UEFIVariable
                     # Advance to the next entry
                     $currentPos = $currentPos + $nextOffset
                 }
+                until ($nextOffset -eq 0)
             }
             else
             {
@@ -180,7 +186,6 @@ function Get-UEFIVariable
                 }
             }
         }
-
     }
     END {
         $rc = Set-LHSTokenPrivilege -Privilege SeSystemEnvironmentPrivilege -Disable
